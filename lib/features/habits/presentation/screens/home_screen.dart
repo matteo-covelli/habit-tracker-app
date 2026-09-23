@@ -41,13 +41,10 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allHabits = ref.watch(habitsProvider);
     final selectedDate = ref.watch(selectedDateProvider);
+    // Utilizza il provider reattivo che filtra già per giorno e data di inizio
+    final visibleHabits = ref.watch(visibleHabitsProvider);
 
-    // Mostra solo gli habit validi per la data selezionata
-    final visibleHabits = allHabits
-        .where((h) => h.isVisibleOn(selectedDate))
-        .toList();
     final completedCount = visibleHabits
         .where((h) => h.isCompletedOn(selectedDate))
         .length;
@@ -151,7 +148,7 @@ class HomeScreen extends ConsumerWidget {
         slivers: [
           const SliverToBoxAdapter(child: QuoteCard()),
 
-          // Sezione Header con conteggio per la data selezionata
+          // Intestazione con contatore completati del giorno
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

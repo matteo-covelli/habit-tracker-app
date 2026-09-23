@@ -68,7 +68,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
     _selectedGoal = h?.goal ?? HabitGoal.build;
     _selectedIconCode = h?.iconCodePoint ?? _iconChoices.first;
     _selectedDays = h != null
-        ? List.from(h.frequencyDays)
+        ? List<int>.from(h.frequencyDays)
         : [1, 2, 3, 4, 5, 6, 7];
 
     final now = DateTime.now();
@@ -86,14 +86,13 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
         _selectedStartDate = today;
       }
 
-      // Inizializza il reminder dallo stato salvato
       _reminderEnabled = h.reminderTime != null;
       _pickedTime = h.reminderTime != null
           ? _parseTimeString(h.reminderTime!)
           : const TimeOfDay(hour: 7, minute: 30);
     } else {
       _selectedStartDate = today;
-      _reminderEnabled = false; // Spento di default per i nuovi habit
+      _reminderEnabled = false;
       _pickedTime = const TimeOfDay(hour: 7, minute: 30);
     }
   }
@@ -105,6 +104,8 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
   }
 
   bool get _isTitleValid => _titleController.text.trim().isNotEmpty;
+  bool get _isFrequencyValid => _selectedDays.isNotEmpty;
+  bool get _canSubmit => _isTitleValid && _isFrequencyValid;
 
   TimeOfDay _parseTimeString(String timeString) {
     try {
@@ -263,20 +264,20 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
   void _submit() {
     setState(() => _hasSubmittedOnce = true);
     final title = _titleController.text.trim();
-    if (title.isEmpty) return;
+    if (!_canSubmit) return;
 
-    // Se il reminder è disattivato viene impostato a null, altrimenti salva la stringa oraria
     final formattedReminder = _reminderEnabled
         ? _formatTimeOfDay(_pickedTime)
         : null;
     final startDateIso = _formatIsoDate(_selectedStartDate);
+    final sortedDays = List<int>.from(_selectedDays)..sort();
 
     if (widget.habitToEdit != null) {
       final updated = widget.habitToEdit!.copyWith(
         title: title,
         goal: _selectedGoal,
         iconCodePoint: _selectedIconCode,
-        frequencyDays: _selectedDays,
+        frequencyDays: sortedDays,
         reminderTime: formattedReminder,
         startDate: startDateIso,
       );
@@ -287,7 +288,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
         title: title,
         iconCodePoint: _selectedIconCode,
         goal: _selectedGoal,
-        frequencyDays: _selectedDays,
+        frequencyDays: sortedDays,
         reminderTime: formattedReminder,
         startDate: startDateIso,
       );
@@ -307,7 +308,8 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
   Widget build(BuildContext context) {
     final isEditing = widget.habitToEdit != null;
     final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
-    final showError = _hasSubmittedOnce && !_isTitleValid;
+    final showTitleError = _hasSubmittedOnce && !_isTitleValid;
+    final showFrequencyError = _hasSubmittedOnce && !_isFrequencyValid;
 
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -374,7 +376,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 color: const Color(0xFF0F1420),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: showError
+                  color: showTitleError
                       ? AppColors.deleteRedText
                       : Colors.transparent,
                   width: 1.5,
@@ -394,7 +396,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 ),
               ),
             ),
-            if (showError) ...[
+            if (showTitleError) ...[
               const SizedBox(height: 6),
               const Text(
                 'Habit name cannot be empty',
@@ -502,7 +504,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      if (isSelected) {
+                      if (_selectedDays.contains(dayIndex)) {
                         _selectedDays.remove(dayIndex);
                       } else {
                         _selectedDays.add(dayIndex);
@@ -534,6 +536,17 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 );
               }),
             ),
+            if (showFrequencyError) ...[
+              const SizedBox(height: 6),
+              const Text(
+                'Please select at least one day',
+                style: TextStyle(
+                  color: AppColors.deleteRedText,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
 
             const Text(
@@ -588,7 +601,6 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
             ),
             const SizedBox(height: 20),
 
-            // Sezione Reminder
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
@@ -686,7 +698,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
             const SizedBox(height: 24),
 
             ElevatedButton(
-              onPressed: _isTitleValid ? _submit : null,
+              onPressed: _canSubmit ? _submit : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryButton,
                 disabledBackgroundColor: AppColors.primaryButton.withOpacity(

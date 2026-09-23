@@ -26,6 +26,13 @@ final habitsProvider = NotifierProvider<HabitsNotifier, List<Habit>>(() {
   return HabitsNotifier();
 });
 
+/// Provider reattivo che restituisce solo le abitudini visibili nel giorno selezionato
+final visibleHabitsProvider = Provider<List<Habit>>((ref) {
+  final selectedDate = ref.watch(selectedDateProvider);
+  final allHabits = ref.watch(habitsProvider);
+  return allHabits.where((habit) => habit.isVisibleOn(selectedDate)).toList();
+});
+
 class HabitsNotifier extends Notifier<List<Habit>> {
   late final HabitRepository _repository;
 
@@ -39,7 +46,7 @@ class HabitsNotifier extends Notifier<List<Habit>> {
     state = [...state, habit];
     await _repository.saveHabits(state);
 
-    // Pianifica la notifica se è stato impostato un orario
+    // Notifica solo se il toggle è attivo e c'è almeno un giorno selezionato
     if (habit.reminderTime != null) {
       await NotificationService().scheduleHabitNotification(habit);
     }
@@ -52,7 +59,7 @@ class HabitsNotifier extends Notifier<List<Habit>> {
     ];
     await _repository.saveHabits(state);
 
-    // Se l'orario esiste aggiorna la notifica, altrimenti rimuovila
+    // Se il promemoria è attivo aggiorna i giorni schedulati, altrimenti cancella
     if (updatedHabit.reminderTime != null) {
       await NotificationService().scheduleHabitNotification(updatedHabit);
     } else {
@@ -91,7 +98,6 @@ class HabitsNotifier extends Notifier<List<Habit>> {
     state = state.where((habit) => habit.id != habitId).toList();
     await _repository.saveHabits(state);
 
-    // Cancella la notifica programmata quando l'abitudine viene eliminata
     await NotificationService().cancelNotification(habitId);
   }
 
