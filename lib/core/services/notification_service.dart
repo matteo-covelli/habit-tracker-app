@@ -14,6 +14,16 @@ class NotificationService {
   Future<void> init() async {
     tz.initializeTimeZones();
 
+    // Configura automaticamente tz.local sull'offset locale del dispositivo (evita il bug UTC)
+    try {
+      final localOffset = DateTime.now().timeZoneOffset.inMilliseconds;
+      final matchedLocation = tz.timeZoneDatabase.locations.values.firstWhere(
+        (loc) => loc.currentTimeZone.offset == localOffset,
+        orElse: () => tz.getLocation('Europe/Rome'),
+      );
+      tz.setLocalLocation(matchedLocation);
+    } catch (_) {}
+
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
@@ -30,12 +40,19 @@ class NotificationService {
 
     await _notificationsPlugin.initialize(settings: initSettings);
 
-    // Risoluzione corretta per richiedere i permessi Android
+    // Richiesta permessi Android 13+
     await _notificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.requestNotificationsPermission();
+
+    // Richiesta permessi espliciti iOS
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
   /// Pianifica una notifica giornaliera per l'abitudine
@@ -45,10 +62,9 @@ class NotificationService {
     final time = _parseReminderTime(habit.reminderTime!);
     if (time == null) return;
 
-    // ID numerico univoco generato dall'hash dell'id dell'abitudine
     final notificationId = habit.id.hashCode & 0x7fffffff;
 
-    // Annulla prima eventuali pianificazioni precedenti per evitare duplicati
+    // Cancella eventuali schedulazioni precedenti per questa abitudine
     await cancelNotification(habit.id);
 
     final scheduledDate = _nextInstanceOfTime(time.hour, time.minute);
@@ -61,14 +77,18 @@ class NotificationService {
       priority: Priority.high,
     );
 
-    const iosDetails = DarwinNotificationDetails();
+    // Permette di mostrare banner e suoni anche se l'app è aperta a schermo (iOS)
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
 
     const details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
-    // Parametri nominali corretti senza l'obsoleto uiLocalNotificationDateInterpretation
     await _notificationsPlugin.zonedSchedule(
       id: notificationId,
       title: 'Promemoria Abitudine 🎯',

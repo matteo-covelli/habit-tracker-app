@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../data/habit_repository.dart';
 import '../../domain/habit.dart';
 
@@ -37,6 +38,11 @@ class HabitsNotifier extends Notifier<List<Habit>> {
   Future<void> addHabit(Habit habit) async {
     state = [...state, habit];
     await _repository.saveHabits(state);
+
+    // Pianifica la notifica se è stato impostato un orario
+    if (habit.reminderTime != null) {
+      await NotificationService().scheduleHabitNotification(habit);
+    }
   }
 
   Future<void> updateHabit(Habit updatedHabit) async {
@@ -45,6 +51,13 @@ class HabitsNotifier extends Notifier<List<Habit>> {
         if (habit.id == updatedHabit.id) updatedHabit else habit,
     ];
     await _repository.saveHabits(state);
+
+    // Se l'orario esiste aggiorna la notifica, altrimenti rimuovila
+    if (updatedHabit.reminderTime != null) {
+      await NotificationService().scheduleHabitNotification(updatedHabit);
+    } else {
+      await NotificationService().cancelNotification(updatedHabit.id);
+    }
   }
 
   Future<void> toggleHabitCompletion(String habitId, DateTime date) async {
@@ -77,6 +90,9 @@ class HabitsNotifier extends Notifier<List<Habit>> {
   Future<void> deleteHabit(String habitId) async {
     state = state.where((habit) => habit.id != habitId).toList();
     await _repository.saveHabits(state);
+
+    // Cancella la notifica programmata quando l'abitudine viene eliminata
+    await NotificationService().cancelNotification(habitId);
   }
 
   String _formatDate(DateTime date) {
