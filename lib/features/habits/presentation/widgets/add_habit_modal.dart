@@ -420,38 +420,36 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
               color: const Color(0xFF171E2D),
               borderRadius: BorderRadius.circular(16),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _iconChoices.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 2.1,
-                mainAxisSpacing: 6,
-                crossAxisSpacing: 6,
-              ),
-              itemBuilder: (context, index) {
-                final code = _iconChoices[index];
-                final isSelected = code == _selectedIconCode;
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedIconCode = code),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF333E5A)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      IconData(code, fontFamily: 'MaterialIcons'),
-                      color: isSelected
-                          ? AppColors.primaryButton
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                );
-              },
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Prima riga (prime 4 icone)
+                Row(
+                  children: List.generate(4, (index) {
+                    final code = _iconChoices[index];
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: _buildIconTile(code),
+                      ),
+                    );
+                  }),
+                ),
+                const SizedBox(height: 8),
+                // Seconda riga (seconde 4 icone)
+                Row(
+                  children: List.generate(4, (index) {
+                    final code = _iconChoices[index + 4];
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: _buildIconTile(code),
+                      ),
+                    );
+                  }),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),
@@ -752,6 +750,29 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconTile(int code) {
+    final isSelected = code == _selectedIconCode;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIconCode = code),
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF333E5A) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Icon(
+            IconData(code, fontFamily: 'MaterialIcons'),
+            color: isSelected
+                ? AppColors.primaryButton
+                : AppColors.textSecondary,
+            size: 24,
           ),
         ),
       ),
