@@ -32,6 +32,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
   late HabitGoal _selectedGoal;
   late int _selectedIconCode;
   late List<int> _selectedDays;
+  late DateTime _selectedStartDate;
   bool _reminderEnabled = true;
   TimeOfDay _pickedTime = const TimeOfDay(hour: 7, minute: 30);
   bool _hasSubmittedOnce = false;
@@ -68,6 +69,24 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
     _selectedDays = h != null
         ? List.from(h.frequencyDays)
         : [1, 2, 3, 4, 5, 6, 7];
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (h != null) {
+      try {
+        final parts = h.startDate.split('-');
+        _selectedStartDate = DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
+      } catch (_) {
+        _selectedStartDate = today;
+      }
+    } else {
+      _selectedStartDate = today;
+    }
   }
 
   @override
@@ -78,11 +97,46 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
 
   bool get _isTitleValid => _titleController.text.trim().isNotEmpty;
 
+  String _formatDisplayDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  String _formatIsoDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
   String _formatTimeOfDay(TimeOfDay time) {
     final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
     final minute = time.minute.toString().padLeft(2, '0');
     final period = time.period == DayPeriod.am ? 'AM' : 'PM';
     return '${hour.toString().padLeft(2, '0')}:$minute $period';
+  }
+
+  Future<void> _pickStartDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedStartDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.primaryButton,
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedStartDate = DateTime(picked.year, picked.month, picked.day);
+      });
+    }
   }
 
   void _selectReminderTime() {
@@ -186,6 +240,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
     final formattedReminder = _reminderEnabled
         ? _formatTimeOfDay(_pickedTime)
         : null;
+    final startDateIso = _formatIsoDate(_selectedStartDate);
 
     if (widget.habitToEdit != null) {
       final updated = widget.habitToEdit!.copyWith(
@@ -194,6 +249,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
         iconCodePoint: _selectedIconCode,
         frequencyDays: _selectedDays,
         reminderTime: formattedReminder,
+        startDate: startDateIso,
       );
       ref.read(habitsProvider.notifier).updateHabit(updated);
     } else {
@@ -204,6 +260,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
         goal: _selectedGoal,
         frequencyDays: _selectedDays,
         reminderTime: formattedReminder,
+        startDate: startDateIso,
       );
       ref.read(habitsProvider.notifier).addHabit(newHabit);
     }
@@ -447,6 +504,56 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 ),
               );
             }),
+          ),
+          const SizedBox(height: 20),
+
+          // Selettore Data di Inizio (Start Date)
+          const Text(
+            'Start Date',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: _pickStartDate,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F1420),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today,
+                        size: 18,
+                        color: AppColors.primaryButton,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        _formatDisplayDate(_selectedStartDate),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 20),
 

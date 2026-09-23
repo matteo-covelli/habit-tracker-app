@@ -2,6 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/habit_repository.dart';
 import '../../domain/habit.dart';
 
+/// Provider per la data attualmente selezionata dall'utente nella Home
+final selectedDateProvider = NotifierProvider<SelectedDateNotifier, DateTime>(
+  () {
+    return SelectedDateNotifier();
+  },
+);
+
+class SelectedDateNotifier extends Notifier<DateTime> {
+  @override
+  DateTime build() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  void setDate(DateTime date) {
+    state = DateTime(date.year, date.month, date.day);
+  }
+}
+
 final habitsProvider = NotifierProvider<HabitsNotifier, List<Habit>>(() {
   return HabitsNotifier();
 });

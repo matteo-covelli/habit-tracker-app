@@ -10,14 +10,58 @@ import '../../../quote/presentation/widgets/quote_card.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  Future<void> _selectDate(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime currentDate,
+  ) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: currentDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.primaryButton,
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      ref.read(selectedDateProvider.notifier).setDate(picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final habits = ref.watch(habitsProvider);
-    final now = DateTime.now();
-    final completedCount = habits.where((h) => h.isCompletedOn(now)).length;
-    final totalCount = habits.length;
+    final allHabits = ref.watch(habitsProvider);
+    final selectedDate = ref.watch(selectedDateProvider);
 
-    final dateFormatted = DateFormat('EEEE, MMM d').format(now).toUpperCase();
+    // Mostra solo gli habit validi per la data selezionata
+    final visibleHabits = allHabits
+        .where((h) => h.isVisibleOn(selectedDate))
+        .toList();
+    final completedCount = visibleHabits
+        .where((h) => h.isCompletedOn(selectedDate))
+        .length;
+    final totalCount = visibleHabits.length;
+
+    final dateFormatted = DateFormat(
+      'EEEE, MMM d',
+    ).format(selectedDate).toUpperCase();
+
+    final now = DateTime.now();
+    final isToday =
+        selectedDate.year == now.year &&
+        selectedDate.month == now.month &&
+        selectedDate.day == now.day;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -38,7 +82,7 @@ class HomeScreen extends ConsumerWidget {
               Icons.calendar_today_outlined,
               color: AppColors.textPrimary,
             ),
-            onPressed: () {},
+            onPressed: () => _selectDate(context, ref, selectedDate),
           ),
           const SizedBox(width: 8),
         ],
@@ -105,19 +149,18 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: CustomScrollView(
         slivers: [
-          // Quote Card dinamica collegata all'API tramite Dio e Riverpod
           const SliverToBoxAdapter(child: QuoteCard()),
 
-          // Sezione Header "TODAY'S HABITS"
+          // Sezione Header con conteggio per la data selezionata
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "TODAY'S HABITS",
-                    style: TextStyle(
+                  Text(
+                    isToday ? "TODAY'S HABITS" : "HABITS FOR THIS DAY",
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0.5,
@@ -137,15 +180,17 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          // Lista abitudini
-          if (habits.isEmpty)
-            const SliverFillRemaining(
+          // Lista abitudini filtrate
+          if (visibleHabits.isEmpty)
+            SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: Text(
-                  'No habits yet.\nTap + NEW HABIT to start!',
+                  isToday
+                      ? 'No habits yet.\nTap + NEW HABIT to start!'
+                      : 'No habits scheduled for this day.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 15,
                   ),
@@ -155,8 +200,8 @@ class HomeScreen extends ConsumerWidget {
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (context, index) => HabitTile(habit: habits[index]),
-                childCount: habits.length,
+                (context, index) => HabitTile(habit: visibleHabits[index]),
+                childCount: visibleHabits.length,
               ),
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 90)),

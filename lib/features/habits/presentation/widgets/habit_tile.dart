@@ -12,8 +12,9 @@ class HabitTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final now = DateTime.now();
-    final isCompletedToday = habit.isCompletedOn(now);
+    // Risponde alla data attiva selezionata
+    final selectedDate = ref.watch(selectedDateProvider);
+    final isCompleted = habit.isCompletedOn(selectedDate);
 
     return GestureDetector(
       onTap: () => AddHabitModal.show(context, habitToEdit: habit),
@@ -24,7 +25,7 @@ class HabitTile extends ConsumerWidget {
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isCompletedToday
+            color: isCompleted
                 ? Colors.transparent
                 : AppColors.cardBorder.withOpacity(0.5),
             width: 1,
@@ -40,14 +41,14 @@ class HabitTile extends ConsumerWidget {
                 shape: BoxShape.circle,
                 color: _getIconBackgroundColor(
                   habit.iconCodePoint,
-                  isCompletedToday,
+                  isCompleted,
                 ),
               ),
               child: Icon(
                 IconData(habit.iconCodePoint, fontFamily: 'MaterialIcons'),
                 color: _getIconForegroundColor(
                   habit.iconCodePoint,
-                  isCompletedToday,
+                  isCompleted,
                 ),
                 size: 24,
               ),
@@ -63,12 +64,10 @@ class HabitTile extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: isCompletedToday
+                  color: isCompleted
                       ? AppColors.textSecondary
                       : AppColors.textPrimary,
-                  decoration: isCompletedToday
-                      ? TextDecoration.lineThrough
-                      : null,
+                  decoration: isCompleted ? TextDecoration.lineThrough : null,
                   decorationColor: AppColors.textSecondary,
                 ),
               ),
@@ -78,7 +77,7 @@ class HabitTile extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF33271C), // Badge ambrato scuro
+                color: const Color(0xFF33271C),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -110,7 +109,7 @@ class HabitTile extends ConsumerWidget {
               onTap: () {
                 ref
                     .read(habitsProvider.notifier)
-                    .toggleHabitCompletion(habit.id, now);
+                    .toggleHabitCompletion(habit.id, selectedDate);
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -118,17 +117,17 @@ class HabitTile extends ConsumerWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isCompletedToday
+                  color: isCompleted
                       ? AppColors.accentGreen
                       : const Color(0xFF222B3D),
                   border: Border.all(
-                    color: isCompletedToday
+                    color: isCompleted
                         ? AppColors.accentGreen
                         : const Color(0xFF344159),
                     width: 2,
                   ),
                 ),
-                child: isCompletedToday
+                child: isCompleted
                     ? const Icon(
                         Icons.check,
                         size: 20,

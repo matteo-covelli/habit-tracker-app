@@ -11,6 +11,7 @@ class Habit {
   final int streakDays;
   final List<String> completedDates; // Date in formato YYYY-MM-DD
   final String? reminderTime;
+  final String startDate; // Data di inizio in formato YYYY-MM-DD
 
   const Habit({
     required this.id,
@@ -21,11 +22,26 @@ class Habit {
     this.streakDays = 0,
     this.completedDates = const [],
     this.reminderTime,
+    required this.startDate,
   });
 
   bool isCompletedOn(DateTime date) {
     final dateKey = _formatDate(date);
     return completedDates.contains(dateKey);
+  }
+
+  /// Verifica se l'abitudine è attiva nella data specificata
+  bool isVisibleOn(DateTime date) {
+    final start = _parseDate(startDate);
+    final target = DateTime(date.year, date.month, date.day);
+
+    // 1. Non deve comparire prima della data di inizio
+    if (target.isBefore(start)) {
+      return false;
+    }
+
+    // 2. Deve essere programmata per questo giorno della settimana
+    return frequencyDays.contains(date.weekday);
   }
 
   Habit copyWith({
@@ -37,6 +53,7 @@ class Habit {
     int? streakDays,
     List<String>? completedDates,
     String? reminderTime,
+    String? startDate,
   }) {
     return Habit(
       id: id ?? this.id,
@@ -47,6 +64,7 @@ class Habit {
       streakDays: streakDays ?? this.streakDays,
       completedDates: completedDates ?? this.completedDates,
       reminderTime: reminderTime ?? this.reminderTime,
+      startDate: startDate ?? this.startDate,
     );
   }
 
@@ -60,6 +78,7 @@ class Habit {
       'streakDays': streakDays,
       'completedDates': completedDates,
       'reminderTime': reminderTime,
+      'startDate': startDate,
     };
   }
 
@@ -79,10 +98,25 @@ class Habit {
       streakDays: json['streakDays'] as int? ?? 0,
       completedDates: List<String>.from(json['completedDates'] ?? []),
       reminderTime: json['reminderTime'] as String?,
+      startDate: json['startDate'] as String? ?? _formatDate(DateTime.now()),
     );
   }
 
   static String _formatDate(DateTime date) {
     return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  }
+
+  static DateTime _parseDate(String dateStr) {
+    try {
+      final parts = dateStr.split('-');
+      return DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
+    } catch (_) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day);
+    }
   }
 }
