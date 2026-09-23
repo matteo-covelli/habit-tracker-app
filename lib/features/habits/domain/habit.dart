@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// Oggetto sentinella per gestire l'assegnazione esplicita di null in copyWith
+const Object _sentinel = Object();
+
 enum HabitGoal { build, breakHabit, trackOnly }
 
 class Habit {
@@ -52,7 +55,7 @@ class Habit {
     List<int>? frequencyDays,
     int? streakDays,
     List<String>? completedDates,
-    String? reminderTime,
+    Object? reminderTime = _sentinel,
     String? startDate,
   }) {
     return Habit(
@@ -63,7 +66,9 @@ class Habit {
       frequencyDays: frequencyDays ?? this.frequencyDays,
       streakDays: streakDays ?? this.streakDays,
       completedDates: completedDates ?? this.completedDates,
-      reminderTime: reminderTime ?? this.reminderTime,
+      reminderTime: identical(reminderTime, _sentinel)
+          ? this.reminderTime
+          : reminderTime as String?,
       startDate: startDate ?? this.startDate,
     );
   }
