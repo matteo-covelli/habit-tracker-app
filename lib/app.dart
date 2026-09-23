@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/constants/app_colors.dart';
+import 'features/habits/presentation/screens/home_screen.dart';
 
 class HabitTrackApp extends StatelessWidget {
   const HabitTrackApp({super.key});
@@ -11,12 +12,13 @@ class HabitTrackApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(
+        useMaterial3: true,
         brightness: Brightness.dark,
         scaffoldBackgroundColor: AppColors.background,
         colorScheme: const ColorScheme.dark(
-          primary: AppColors.primary,
+          primary: AppColors.primaryButton,
           surface: AppColors.surface,
-          error: AppColors.error,
+          error: AppColors.deleteRedText,
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.background,
@@ -37,14 +39,7 @@ class HabitTrackApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'Habit Tracker Ready',
-            style: TextStyle(color: AppColors.textPrimary),
-          ),
-        ),
-      ),
+      home: const HomeScreen(),
     );
   }
 }

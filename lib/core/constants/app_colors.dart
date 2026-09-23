@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Sfondo principale e superfici
-  static const Color background = Color(0xFF0F1117);
-  static const Color surface = Color(0xFF1B1E28);
-  static const Color surfaceLight = Color(0xFF262A38);
+  // Sfondi e Superfici
+  static const Color background = Color(0xFF0F131D);
+  static const Color surface = Color(0xFF19202E);
+  static const Color surfaceLight = Color(0xFF222B3D);
+  static const Color cardBorder = Color(0xFF283247);
 
-  // Accenti principali
-  static const Color primary = Color(
-    0xFF7C6EF6,
-  ); // Viola/Lilla pulsanti e badge
-  static const Color primaryLight = Color(0xFFA59BFF);
-  static const Color accentGreen = Color(0xFF22C55E); // Check completato
-  static const Color accentOrange = Color(0xFFEAB308); // Streak flame
-  static const Color error = Color(0xFFEF4444); // Delete button
+  // Colori Accento Principali
+  static const Color primaryButton = Color(0xFFA5B4FC); // Lilla / Light Indigo
+  static const Color primaryButtonText = Color(0xFF0F131D);
+  static const Color accentGreen = Color(0xFF34D399); // Check verde smeraldo
+  static const Color accentOrange = Color(0xFFF59E0B); // Fiamma streak
 
-  // Testo
+  // Cerchietti icone abitudini
+  static const Color iconMeditation = Color(0xFF10B981);
+  static const Color iconWater = Color(0xFF818CF8);
+  static const Color iconCircleBg = Color(0xFF232D40);
+
+  // Tipografia
   static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF8E95A9);
-  static const Color textDisabled = Color(0xFF4B5263);
+  static const Color textSecondary = Color(0xFF8E9BB3);
+  static const Color textMuted = Color(0xFF5A667E);
 
-  // Elementi UI secondari
-  static const Color cardBorder = Color(0xFF2A2E3D);
-  static const Color iconBackground = Color(0xFF242838);
+  // Stati e Danger
+  static const Color deleteRedBg = Color(0xFF2D1B22);
+  static const Color deleteRedText = Color(0xFFF87171);
 }

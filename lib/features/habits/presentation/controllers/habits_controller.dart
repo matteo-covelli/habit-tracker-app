@@ -20,6 +20,14 @@ class HabitsNotifier extends Notifier<List<Habit>> {
     await _repository.saveHabits(state);
   }
 
+  Future<void> updateHabit(Habit updatedHabit) async {
+    state = [
+      for (final habit in state)
+        if (habit.id == updatedHabit.id) updatedHabit else habit,
+    ];
+    await _repository.saveHabits(state);
+  }
+
   Future<void> toggleHabitCompletion(String habitId, DateTime date) async {
     final dateKey = _formatDate(date);
 

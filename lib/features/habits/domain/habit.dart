@@ -5,7 +5,6 @@ enum HabitGoal { build, breakHabit, trackOnly }
 class Habit {
   final String id;
   final String title;
-  final String? subtitle;
   final int iconCodePoint;
   final HabitGoal goal;
   final List<int> frequencyDays; // 1 = Lun, 7 = Dom (standard DateTime.weekday)
@@ -16,7 +15,6 @@ class Habit {
   const Habit({
     required this.id,
     required this.title,
-    this.subtitle,
     required this.iconCodePoint,
     this.goal = HabitGoal.build,
     this.frequencyDays = const [1, 2, 3, 4, 5, 6, 7],
@@ -33,7 +31,6 @@ class Habit {
   Habit copyWith({
     String? id,
     String? title,
-    String? subtitle,
     int? iconCodePoint,
     HabitGoal? goal,
     List<int>? frequencyDays,
@@ -44,7 +41,6 @@ class Habit {
     return Habit(
       id: id ?? this.id,
       title: title ?? this.title,
-      subtitle: subtitle ?? this.subtitle,
       iconCodePoint: iconCodePoint ?? this.iconCodePoint,
       goal: goal ?? this.goal,
       frequencyDays: frequencyDays ?? this.frequencyDays,
@@ -58,7 +54,6 @@ class Habit {
     return {
       'id': id,
       'title': title,
-      'subtitle': subtitle,
       'iconCodePoint': iconCodePoint,
       'goal': goal.name,
       'frequencyDays': frequencyDays,
@@ -72,7 +67,6 @@ class Habit {
     return Habit(
       id: json['id'] as String,
       title: json['title'] as String,
-      subtitle: json['subtitle'] as String?,
       iconCodePoint:
           json['iconCodePoint'] as int? ?? Icons.fitness_center.codePoint,
       goal: HabitGoal.values.firstWhere(
