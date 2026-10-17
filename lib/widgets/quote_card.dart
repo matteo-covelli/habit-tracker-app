@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../constants/app_colors.dart';
 import '../controllers/quote_controller.dart';
 
 class QuoteCard extends ConsumerWidget {
@@ -95,7 +95,7 @@ class QuoteCard extends ConsumerWidget {
                     minHeight: 2,
                   ),
                 ),
-                error: (_, __) => const Column(
+                error: (_, _) => const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(

@@ -2,17 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../domain/habit.dart';
+import '../constants/app_colors.dart';
 import '../controllers/habits_controller.dart';
+import '../models/habit.dart';
 
 class AddHabitModal extends ConsumerStatefulWidget {
   final Habit? habitToEdit;
 
   const AddHabitModal({super.key, this.habitToEdit});
 
-  static Future<void> show(BuildContext context, {Habit? habitToEdit}) {
-    return showModalBottomSheet(
+  static Future<bool?> show(BuildContext context, {Habit? habitToEdit}) {
+    return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -294,13 +294,13 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
       );
       ref.read(habitsProvider.notifier).addHabit(newHabit);
     }
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(false);
   }
 
   void _delete() {
     if (widget.habitToEdit != null) {
       ref.read(habitsProvider.notifier).deleteHabit(widget.habitToEdit!.id);
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -636,7 +636,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                       ),
                       Switch.adaptive(
                         value: _reminderEnabled,
-                        activeColor: AppColors.primaryButton,
+                        activeThumbColor: AppColors.primaryButton,
                         onChanged: (val) =>
                             setState(() => _reminderEnabled = val),
                       ),
@@ -701,8 +701,8 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
               onPressed: _canSubmit ? _submit : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryButton,
-                disabledBackgroundColor: AppColors.primaryButton.withOpacity(
-                  0.35,
+                disabledBackgroundColor: AppColors.primaryButton.withValues(
+                  alpha: 0.35,
                 ),
                 foregroundColor: AppColors.primaryButtonText,
                 disabledForegroundColor: Colors.white38,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'core/constants/app_colors.dart';
-import 'features/habits/presentation/screens/home_screen.dart';
+import 'constants/app_colors.dart';
+import 'screens/main_shell_screen.dart';
 
 class HabitTrackApp extends StatelessWidget {
   const HabitTrackApp({super.key});
@@ -39,7 +39,7 @@ class HabitTrackApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeScreen(),
+      home: const MainShellScreen(),
     );
   }
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../domain/habit.dart';
+import '../constants/app_colors.dart';
 import '../controllers/habits_controller.dart';
-import 'add_habit_modal.dart';
+import '../models/habit.dart';
 
 class HabitTile extends ConsumerWidget {
   final Habit habit;
@@ -16,8 +15,14 @@ class HabitTile extends ConsumerWidget {
     final selectedDate = ref.watch(selectedDateProvider);
     final isCompleted = habit.isCompletedOn(selectedDate);
 
+    void toggleCompletion() {
+      ref
+          .read(habitsProvider.notifier)
+          .toggleHabitCompletion(habit.id, selectedDate);
+    }
+
     return GestureDetector(
-      onTap: () => AddHabitModal.show(context, habitToEdit: habit),
+      onTap: toggleCompletion,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -27,7 +32,7 @@ class HabitTile extends ConsumerWidget {
           border: Border.all(
             color: isCompleted
                 ? Colors.transparent
-                : AppColors.cardBorder.withOpacity(0.5),
+                : AppColors.cardBorder.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -106,11 +111,7 @@ class HabitTile extends ConsumerWidget {
 
             // Pulsante circolare di check
             GestureDetector(
-              onTap: () {
-                ref
-                    .read(habitsProvider.notifier)
-                    .toggleHabitCompletion(habit.id, selectedDate);
-              },
+              onTap: toggleCompletion,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 width: 32,

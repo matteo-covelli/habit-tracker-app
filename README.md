@@ -21,28 +21,34 @@ A sleek, offline-first mobile application designed to help users build and maint
 - **Local Storage:** [shared_preferences](https://pub.dev/packages/shared_preferences)
 - **Navigation:** [GoRouter](https://pub.dev/packages/go_router)
 
-### Project Structure (Feature-First)
+### Project Structure
 
 ```text
 lib/
-├── app.dart                   # MaterialApp, global dark theme configuration
-├── main.dart                  # ProviderScope, async SharedPreferences initialization
-│
-├── core/                      # Shared global resources
-│   ├── constants/             # Design tokens & color palettes (AppColors)
-│   ├── network/               # Configured Dio HTTP client
-│   ├── router/                # App route definitions
-│   └── storage/               # Storage adapters and interfaces
-│
-└── features/                  # Vertical domain slices
-    ├── quote/                 # Feature: Daily Quotes (Data & UI)
-    └── habits/                # Feature: Habits Management
-        ├── data/              # HabitRepository & JSON serialization
-        ├── domain/            # Habit entity model
-        └── presentation/      # UI components & Riverpod controllers
-            ├── controllers/   # HabitsNotifier & state management
-            ├── screens/       # Main views (HomeScreen, FormScreen)
-            └── widgets/       # Modular UI components (HabitTile, etc.)
+├── app.dart                         # MaterialApp & global dark theme configuration
+├── main.dart                        # ProviderScope, SharedPreferences & NotificationService init
+├── constants/
+│   └── app_colors.dart              # Design tokens & color palettes (AppColors)
+├── models/
+│   ├── habit.dart                   # Habit & HabitGoal domain models
+│   └── quote.dart                   # Quote domain model
+├── services/                        # Unified services directory
+│   ├── habit_repository.dart        # Local storage persistence (SharedPreferences)
+│   ├── notification_service.dart    # Local notifications scheduler
+│   └── quote_service.dart           # Remote quote API service (Dio)
+├── controllers/
+│   ├── habits_controller.dart       # HabitsNotifier, SelectedDateNotifier & providers
+│   └── quote_controller.dart        # QuoteNotifier provider
+├── screens/
+│   ├── main_shell_screen.dart       # Bottom navigation shell
+│   ├── home_screen.dart             # Daily habits view with horizontal swipe navigation
+│   ├── analytics_screen.dart        # Habit Analytics list with search & goal filters
+│   ├── habit_detail_screen.dart     # Monthly interactive calendar, GitHub consistency & edit action
+│   └── profile_screen.dart          # User profile & total completed habits counter
+└── widgets/
+    ├── add_habit_modal.dart         # Create / Edit habit bottom sheet
+    ├── habit_tile.dart              # Daily habit completion card
+    └── quote_card.dart              # Motivational quote card
 ```
 
 ---

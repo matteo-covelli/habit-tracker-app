@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/services/notification_service.dart';
-import '../../data/habit_repository.dart';
-import '../../domain/habit.dart';
+import '../models/habit.dart';
+import '../services/habit_repository.dart';
+import '../services/notification_service.dart';
 
 /// Provider per la data attualmente selezionata dall'utente nella Home
 final selectedDateProvider = NotifierProvider<SelectedDateNotifier, DateTime>(
@@ -20,6 +20,14 @@ class SelectedDateNotifier extends Notifier<DateTime> {
   void setDate(DateTime date) {
     state = DateTime(date.year, date.month, date.day);
   }
+
+  void nextDay() {
+    state = DateTime(state.year, state.month, state.day + 1);
+  }
+
+  void previousDay() {
+    state = DateTime(state.year, state.month, state.day - 1);
+  }
 }
 
 final habitsProvider = NotifierProvider<HabitsNotifier, List<Habit>>(() {
@@ -31,6 +39,15 @@ final visibleHabitsProvider = Provider<List<Habit>>((ref) {
   final selectedDate = ref.watch(selectedDateProvider);
   final allHabits = ref.watch(habitsProvider);
   return allHabits.where((habit) => habit.isVisibleOn(selectedDate)).toList();
+});
+
+/// Provider che calcola il numero totale di completamenti registrati su tutte le abitudini
+final totalCompletedHabitsProvider = Provider<int>((ref) {
+  final allHabits = ref.watch(habitsProvider);
+  return allHabits.fold<int>(
+    0,
+    (sum, habit) => sum + habit.completedDates.length,
+  );
 });
 
 class HabitsNotifier extends Notifier<List<Habit>> {

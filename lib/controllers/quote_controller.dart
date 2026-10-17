@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/quote_service.dart';
-import '../../domain/quote.dart';
+import '../models/quote.dart';
+import '../services/quote_service.dart';
 
 final quoteNotifierProvider = AsyncNotifierProvider<QuoteNotifier, Quote>(
   QuoteNotifier.new,

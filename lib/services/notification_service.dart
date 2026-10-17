@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import '../../features/habits/domain/habit.dart';
+import '../models/habit.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -17,7 +17,7 @@ class NotificationService {
     try {
       final localOffset = DateTime.now().timeZoneOffset.inMilliseconds;
       final matchedLocation = tz.timeZoneDatabase.locations.values.firstWhere(
-        (loc) => loc.currentTimeZone.offset == localOffset,
+        (loc) => loc.currentTimeZone.offset.inMilliseconds == localOffset,
         orElse: () => tz.getLocation('Europe/Rome'),
       );
       tz.setLocalLocation(matchedLocation);
