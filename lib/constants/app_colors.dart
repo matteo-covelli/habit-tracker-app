@@ -28,24 +28,24 @@ class AppColors {
   static const Color deleteRedText = Color(0xFFF87171);
 
   /// Restituisce il colore principale associato all'icona dell'abitudine
-  static Color getHabitIconColor(int codePoint) {
+  static Color getHabitIconColor(int codePoint, {bool isDark = true}) {
     if (codePoint == Icons.directions_run.codePoint) {
       return const Color(0xFF10B981);
     }
     if (codePoint == Icons.self_improvement.codePoint) {
-      return const Color(0xFFA5B4FC);
+      return isDark ? const Color(0xFFA5B4FC) : const Color(0xFF6366F1);
     }
     if (codePoint == Icons.menu_book.codePoint) {
-      return const Color(0xFFE2E8F0);
+      return isDark ? const Color(0xFFE2E8F0) : const Color(0xFF475569);
     }
     if (codePoint == Icons.water_drop.codePoint) {
-      return const Color(0xFF34D399);
+      return isDark ? const Color(0xFF34D399) : const Color(0xFF0EA5E9);
     }
     if (codePoint == Icons.code.codePoint) {
-      return const Color(0xFFA5B4FC);
+      return isDark ? const Color(0xFFA5B4FC) : const Color(0xFF6366F1);
     }
     if (codePoint == Icons.nightlight_round.codePoint) {
-      return const Color(0xFFFBBF24);
+      return isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706);
     }
     if (codePoint == Icons.alarm.codePoint) {
       return const Color(0xFFF97316);
@@ -54,7 +54,13 @@ class AppColors {
   }
 
   /// Restituisce il colore di sfondo del cerchio icona
-  static Color getHabitIconBgColor(int codePoint) {
+  static Color getHabitIconBgColor(int codePoint, {bool isDark = true}) {
+    if (!isDark) {
+      return getHabitIconColor(
+        codePoint,
+        isDark: false,
+      ).withValues(alpha: 0.14);
+    }
     if (codePoint == Icons.directions_run.codePoint) {
       return const Color(0xFF11352F);
     }
@@ -77,5 +83,80 @@ class AppColors {
       return const Color(0xFF35231B);
     }
     return const Color(0xFF35281A);
+  }
+
+  // --- Helper dinamici per Tema Chiaro / Scuro ---
+
+  static bool isDark(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark;
+
+  static Color bg(BuildContext context) =>
+      isDark(context) ? background : const Color(0xFFF4F6FB);
+
+  static Color card(BuildContext context) =>
+      isDark(context) ? const Color(0xFF151C28) : Colors.white;
+
+  static Color surfaceCard(BuildContext context) =>
+      isDark(context) ? surface : Colors.white;
+
+  static Color elevatedSurface(BuildContext context) =>
+      isDark(context) ? const Color(0xFF1B2333) : Colors.white;
+
+  static Color modalBg(BuildContext context) =>
+      isDark(context) ? const Color(0xFF131926) : const Color(0xFFF8FAFC);
+
+  static Color subtleBg(BuildContext context) =>
+      isDark(context) ? const Color(0xFF0E131D) : const Color(0xFFEEF2F8);
+
+  static Color chipUnselected(BuildContext context) =>
+      isDark(context) ? const Color(0xFF1A2234) : const Color(0xFFE8EEF6);
+
+  static Color cellUnmarked(BuildContext context) =>
+      isDark(context) ? const Color(0xFF232B3C) : const Color(0xFFE2E8F0);
+
+  static Color border(BuildContext context) =>
+      isDark(context) ? const Color(0xFF212B3E) : const Color(0xFFE2E8F0);
+
+  static Color textMain(BuildContext context) =>
+      isDark(context) ? textPrimary : const Color(0xFF0F172A);
+
+  static Color textSub(BuildContext context) =>
+      isDark(context) ? textSecondary : const Color(0xFF64748B);
+
+  static Color accentPrimary(BuildContext context) =>
+      isDark(context) ? primaryButton : const Color(0xFF6366F1);
+
+  static Color accentPrimaryFg(BuildContext context) =>
+      isDark(context) ? primaryButtonText : Colors.white;
+
+  static Color streakBg(BuildContext context) =>
+      isDark(context) ? const Color(0xFF33261B) : const Color(0xFFFFF7ED);
+
+  static Color streakBorder(BuildContext context) =>
+      isDark(context) ? const Color(0xFF4D3822) : const Color(0xFFFED7AA);
+
+  static Color streakText(BuildContext context) =>
+      isDark(context) ? accentOrange : const Color(0xFFD97706);
+
+  static Widget pickerTheme(BuildContext context, Widget? child) {
+    final dark = isDark(context);
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: dark
+            ? const ColorScheme.dark(
+                primary: accentGreen,
+                onPrimary: Color(0xFF0F131D),
+                surface: surface,
+                onSurface: textPrimary,
+              )
+            : const ColorScheme.light(
+                primary: Color(0xFF10B981),
+                onPrimary: Colors.white,
+                surface: Colors.white,
+                onSurface: Color(0xFF0F172A),
+              ),
+      ),
+      child: child!,
+    );
   }
 }

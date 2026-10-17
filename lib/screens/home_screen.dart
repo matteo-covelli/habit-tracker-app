@@ -88,19 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       initialDate: currentDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2035),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.accentGreen,
-              onPrimary: Color(0xFF0F131D),
-              surface: AppColors.surface,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) => AppColors.pickerTheme(context, child),
     );
 
     if (picked != null) {
@@ -121,8 +109,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final now = DateTime.now();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bg(context),
       appBar: AppBar(
+        backgroundColor: AppColors.bg(context),
         titleSpacing: 20,
         title: ClipRect(
           child: AnimatedSwitcher(
@@ -145,20 +134,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Text(
               dateFormatted,
               key: ValueKey(dateFormatted),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.5,
-                color: AppColors.textPrimary,
+                color: AppColors.textMain(context),
               ),
             ),
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.calendar_today_outlined,
-              color: AppColors.textPrimary,
+              color: AppColors.textMain(context),
             ),
             onPressed: () => _selectDate(context, selectedDate),
           ),
@@ -166,8 +155,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primaryButton,
-        foregroundColor: AppColors.primaryButtonText,
+        backgroundColor: AppColors.accentPrimary(context),
+        foregroundColor: AppColors.accentPrimaryFg(context),
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         icon: const Icon(Icons.add, size: 22),
@@ -227,21 +216,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           isToday ? "TODAY'S HABITS" : "HABITS FOR THIS DAY",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.5,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textMain(context),
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '$completedCount of $totalCount Completed',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textSub(context),
                         ),
                       ),
                     ],
@@ -259,8 +248,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ? 'No habits yet.\nTap + NEW HABIT to start!'
                           : 'No habits scheduled for this day.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: AppColors.textSub(context),
                         fontSize: 15,
                       ),
                     ),

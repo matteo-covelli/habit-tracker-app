@@ -102,6 +102,30 @@ void main() {
       expect(find.text('Edit Habit'), findsOneWidget);
       expect(find.text('Habit Name & Icon'), findsOneWidget);
       expect(find.text('Choose Icon'), findsNothing);
+
+      // Chiudi il modal e torna indietro
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+
+      // 4. Naviga alla schermata Settings e verifica il cambio tema (Light / Dark / System)
+      await tester.tap(find.byIcon(Icons.settings_outlined));
+      await tester.pumpAndSettle();
+      expect(find.text('Settings'), findsWidgets);
+      expect(find.text('App Theme'), findsOneWidget);
+
+      await tester.tap(find.text('Light'));
+      await tester.pumpAndSettle();
+      expect(sharedPreferences.getString('app_theme_mode'), 'light');
+
+      await tester.tap(find.text('System'));
+      await tester.pumpAndSettle();
+      expect(sharedPreferences.getString('app_theme_mode'), 'system');
+
+      await tester.tap(find.text('Dark'));
+      await tester.pumpAndSettle();
+      expect(sharedPreferences.getString('app_theme_mode'), 'dark');
     },
   );
 }

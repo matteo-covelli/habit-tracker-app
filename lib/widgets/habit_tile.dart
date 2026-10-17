@@ -14,6 +14,7 @@ class HabitTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final DateTime targetDate = date ?? ref.watch(selectedDateProvider);
     final isCompleted = habit.isCompletedOn(targetDate);
+    final isDark = AppColors.isDark(context);
 
     void toggleCompletion() {
       ref
@@ -27,14 +28,23 @@ class HabitTile extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.surfaceCard(context),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isCompleted
-                ? Colors.transparent
-                : AppColors.cardBorder.withValues(alpha: 0.5),
+                ? (isDark ? Colors.transparent : AppColors.border(context))
+                : AppColors.border(context),
             width: 1,
           ),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
         child: Row(
           children: [
@@ -46,14 +56,14 @@ class HabitTile extends ConsumerWidget {
                 shape: BoxShape.circle,
                 color: _getIconBackgroundColor(
                   habit.iconCodePoint,
-                  isCompleted,
+                  isDark,
                 ),
               ),
               child: Icon(
                 IconData(habit.iconCodePoint, fontFamily: 'MaterialIcons'),
                 color: _getIconForegroundColor(
                   habit.iconCodePoint,
-                  isCompleted,
+                  isDark,
                 ),
                 size: 24,
               ),
@@ -70,10 +80,10 @@ class HabitTile extends ConsumerWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: isCompleted
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
+                      ? AppColors.textSub(context)
+                      : AppColors.textMain(context),
                   decoration: isCompleted ? TextDecoration.lineThrough : null,
-                  decorationColor: AppColors.textSecondary,
+                  decorationColor: AppColors.textSub(context),
                 ),
               ),
             ),
@@ -82,16 +92,21 @@ class HabitTile extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF33271C),
+                color: AppColors.streakBg(context),
                 borderRadius: BorderRadius.circular(14),
+                border: isDark
+                    ? null
+                    : Border.all(color: AppColors.streakBorder(context)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     '${habit.streakDays}d',
-                    style: const TextStyle(
-                      color: Color(0xFFFBBF24),
+                    style: TextStyle(
+                      color: isDark
+                          ? const Color(0xFFFBBF24)
+                          : AppColors.streakText(context),
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                     ),
@@ -120,11 +135,15 @@ class HabitTile extends ConsumerWidget {
                   shape: BoxShape.circle,
                   color: isCompleted
                       ? AppColors.accentGreen
-                      : const Color(0xFF222B3D),
+                      : (isDark
+                            ? const Color(0xFF222B3D)
+                            : const Color(0xFFEEF2F8)),
                   border: Border.all(
                     color: isCompleted
                         ? AppColors.accentGreen
-                        : const Color(0xFF344159),
+                        : (isDark
+                              ? const Color(0xFF344159)
+                              : const Color(0xFFCBD5E1)),
                     width: 2,
                   ),
                 ),
@@ -143,15 +162,17 @@ class HabitTile extends ConsumerWidget {
     );
   }
 
-  Color _getIconBackgroundColor(int codePoint, bool isCompleted) {
+  Color _getIconBackgroundColor(int codePoint, bool isDark) {
     if (codePoint == Icons.water_drop.codePoint) return const Color(0xFF818CF8);
     if (codePoint == Icons.self_improvement.codePoint) {
       return const Color(0xFF10B981);
     }
-    return const Color(0xFF263145);
+    return isDark
+        ? const Color(0xFF263145)
+        : const Color(0xFFF59E0B).withValues(alpha: 0.14);
   }
 
-  Color _getIconForegroundColor(int codePoint, bool isCompleted) {
+  Color _getIconForegroundColor(int codePoint, bool isDark) {
     if (codePoint == Icons.water_drop.codePoint ||
         codePoint == Icons.self_improvement.codePoint) {
       return Colors.white;

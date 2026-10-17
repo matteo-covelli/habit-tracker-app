@@ -9,13 +9,26 @@ class QuoteCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final quoteAsync = ref.watch(quoteNotifierProvider);
+    final isDark = AppColors.isDark(context);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B2333),
+        color: AppColors.elevatedSurface(context),
         borderRadius: BorderRadius.circular(28),
+        border: isDark
+            ? null
+            : Border.all(color: AppColors.border(context), width: 1),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Stack(
         children: [
@@ -26,18 +39,18 @@ class QuoteCard extends ConsumerWidget {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               icon: quoteAsync.isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 16,
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSub(context),
                       ),
                     )
-                  : const Icon(
+                  : Icon(
                       Icons.refresh,
                       size: 20,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSub(context),
                     ),
               onPressed: quoteAsync.isLoading
                   ? null
@@ -53,11 +66,13 @@ class QuoteCard extends ConsumerWidget {
                 height: 38,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : AppColors.subtleBg(context),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.format_quote,
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSub(context),
                   size: 22,
                 ),
               ),
@@ -68,34 +83,34 @@ class QuoteCard extends ConsumerWidget {
                   children: [
                     Text(
                       '"${quote.text}"',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontStyle: FontStyle.italic,
                         height: 1.4,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textMain(context),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       '— ${quote.author.toUpperCase()}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.0,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSub(context),
                       ),
                     ),
                   ],
                 ),
-                loading: () => const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 14),
+                loading: () => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   child: LinearProgressIndicator(
-                    backgroundColor: Color(0xFF131926),
-                    color: AppColors.primaryButton,
+                    backgroundColor: AppColors.subtleBg(context),
+                    color: AppColors.accentPrimary(context),
                     minHeight: 2,
                   ),
                 ),
-                error: (_, _) => const Column(
+                error: (_, _) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -104,17 +119,17 @@ class QuoteCard extends ConsumerWidget {
                         fontSize: 15,
                         fontStyle: FontStyle.italic,
                         height: 1.4,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textMain(context),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       '— ARISTOTLE',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.0,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSub(context),
                       ),
                     ),
                   ],

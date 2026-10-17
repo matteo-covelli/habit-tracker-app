@@ -78,7 +78,7 @@ class AddHabitModal extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: const Color(0xFF131926),
+      backgroundColor: AppColors.modalBg(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
@@ -197,7 +197,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: const Color(0xFF131926),
+      backgroundColor: AppColors.modalBg(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
@@ -215,19 +215,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
       initialDate: _selectedStartDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2035),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.accentGreen,
-              onPrimary: Color(0xFF0F131D),
-              surface: AppColors.surface,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) => AppColors.pickerTheme(context, child),
     );
 
     if (picked != null) {
@@ -241,19 +229,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
     final picked = await showTimePicker(
       context: context,
       initialTime: _pickedTime,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.accentGreen,
-              onPrimary: Color(0xFF0F131D),
-              surface: AppColors.surface,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) => AppColors.pickerTheme(context, child),
     );
 
     if (picked != null) {
@@ -307,6 +283,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.habitToEdit != null;
+    final isDark = AppColors.isDark(context);
     final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
     final showTitleError = _hasSubmittedOnce && !_isTitleValid;
     final showFrequencyError = _hasSubmittedOnce && !_isFrequencyValid;
@@ -324,7 +301,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 width: 48,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: isDark ? Colors.white24 : Colors.black26,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -336,24 +313,26 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
               children: [
                 Text(
                   isEditing ? 'Edit Habit' : 'Create New Habit',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textMain(context),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1E2638),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF1E2638)
+                          : AppColors.chipUnselected(context),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
                       size: 20,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSub(context),
                     ),
                   ),
                 ),
@@ -361,12 +340,12 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
             ),
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'Habit Name & Icon',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
+                color: AppColors.textSub(context),
               ),
             ),
             const SizedBox(height: 8),
@@ -379,7 +358,9 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF172232),
+                      color: isDark
+                          ? const Color(0xFF172232)
+                          : AppColors.accentGreen.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: AppColors.accentGreen.withValues(alpha: 0.6),
@@ -426,20 +407,22 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                     height: 52,
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F1420),
+                      color: isDark ? const Color(0xFF0F1420) : Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: showTitleError
                             ? AppColors.deleteRedText
-                            : const Color(0xFF1E2638),
+                            : (isDark
+                                  ? const Color(0xFF1E2638)
+                                  : AppColors.border(context)),
                         width: 1.5,
                       ),
                     ),
                     alignment: Alignment.center,
                     child: TextField(
                       controller: _titleController,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColors.textMain(context),
                         fontWeight: FontWeight.w600,
                       ),
                       decoration: const InputDecoration(
@@ -466,30 +449,33 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
             ],
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'Habit Goal',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
+                color: AppColors.textSub(context),
               ),
             ),
             const SizedBox(height: 8),
             Row(
               children: [
                 _buildGoalItem(
+                  context,
                   HabitGoal.build,
                   'Build Habit',
                   Icons.add_circle_outline,
                 ),
                 const SizedBox(width: 8),
                 _buildGoalItem(
+                  context,
                   HabitGoal.breakHabit,
                   'Break Habit',
                   Icons.remove_circle_outline,
                 ),
                 const SizedBox(width: 8),
                 _buildGoalItem(
+                  context,
                   HabitGoal.trackOnly,
                   'Track Only',
                   Icons.show_chart,
@@ -498,12 +484,12 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
             ),
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'Frequency',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
+                color: AppColors.textSub(context),
               ),
             ),
             const SizedBox(height: 10),
@@ -531,7 +517,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                         shape: BoxShape.circle,
                         color: isSelected
                             ? AppColors.accentGreen
-                            : const Color(0xFF1A2234),
+                            : AppColors.chipUnselected(context),
                       ),
                       child: Center(
                         child: Text(
@@ -541,7 +527,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                             fontWeight: FontWeight.w800,
                             color: isSelected
                                 ? const Color(0xFF0F131D)
-                                : AppColors.textSecondary,
+                                : AppColors.textSub(context),
                           ),
                         ),
                       ),
@@ -563,12 +549,12 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
             ],
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'Start Date',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
+                color: AppColors.textSub(context),
               ),
             ),
             const SizedBox(height: 8),
@@ -580,10 +566,12 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF171E2D),
+                  color: isDark ? const Color(0xFF171E2D) : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF263147),
+                    color: isDark
+                        ? const Color(0xFF263147)
+                        : AppColors.border(context),
                     width: 1,
                   ),
                 ),
@@ -613,10 +601,10 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                               _formatDisplayDate(_selectedStartDate),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                                color: AppColors.textMain(context),
                               ),
                             ),
                           ),
@@ -630,7 +618,9 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0F1420),
+                        color: isDark
+                            ? const Color(0xFF0F1420)
+                            : AppColors.subtleBg(context),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Row(
@@ -661,9 +651,14 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: const Color(0xFF171E2D),
+                color: isDark ? const Color(0xFF171E2D) : Colors.white,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFF263147), width: 1),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF263147)
+                      : AppColors.border(context),
+                  width: 1,
+                ),
               ),
               child: Column(
                 children: [
@@ -674,7 +669,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                         decoration: BoxDecoration(
                           color: _reminderEnabled
                               ? AppColors.accentGreen.withValues(alpha: 0.14)
-                              : const Color(0xFF222B3D),
+                              : AppColors.chipUnselected(context),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -682,17 +677,17 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                           size: 20,
                           color: _reminderEnabled
                               ? AppColors.accentGreen
-                              : Colors.white,
+                              : AppColors.textMain(context),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Daily Reminder',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: AppColors.textMain(context),
                           ),
                         ),
                       ),
@@ -708,16 +703,16 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                     ],
                   ),
                   if (_reminderEnabled) ...[
-                    const Divider(color: Color(0xFF252F44), height: 24),
+                    Divider(color: AppColors.border(context), height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Reminder Time',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textSub(context),
                           ),
                         ),
                         GestureDetector(
@@ -728,7 +723,9 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F1420),
+                              color: isDark
+                                  ? const Color(0xFF0F1420)
+                                  : AppColors.subtleBg(context),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: AppColors.accentGreen.withValues(
@@ -747,10 +744,10 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                                 const SizedBox(width: 8),
                                 Text(
                                   _formatTimeOfDay(_pickedTime),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                                    color: AppColors.textMain(context),
                                   ),
                                 ),
                                 const SizedBox(width: 4),
@@ -780,7 +777,9 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                   alpha: 0.35,
                 ),
                 foregroundColor: const Color(0xFF0F131D),
-                disabledForegroundColor: Colors.white38,
+                disabledForegroundColor: isDark
+                    ? Colors.white38
+                    : Colors.black38,
                 minimumSize: const Size.fromHeight(56),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
@@ -808,8 +807,12 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
               ElevatedButton(
                 onPressed: _delete,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.deleteRedBg,
-                  foregroundColor: AppColors.deleteRedText,
+                  backgroundColor: isDark
+                      ? AppColors.deleteRedBg
+                      : const Color(0xFFFEE2E2),
+                  foregroundColor: isDark
+                      ? AppColors.deleteRedText
+                      : const Color(0xFFDC2626),
                   minimumSize: const Size.fromHeight(56),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
@@ -838,8 +841,15 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
     );
   }
 
-  Widget _buildGoalItem(HabitGoal goal, String label, IconData icon) {
+  Widget _buildGoalItem(
+    BuildContext context,
+    HabitGoal goal,
+    String label,
+    IconData icon,
+  ) {
     final isSelected = _selectedGoal == goal;
+    final isDark = AppColors.isDark(context);
+
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _selectedGoal = goal),
@@ -847,11 +857,15 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFF162C28)
-                : const Color(0xFF141A27),
+                ? (isDark
+                      ? const Color(0xFF162C28)
+                      : AppColors.accentGreen.withValues(alpha: 0.14))
+                : (isDark ? const Color(0xFF141A27) : Colors.white),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isSelected ? AppColors.accentGreen : Colors.transparent,
+              color: isSelected
+                  ? AppColors.accentGreen
+                  : (isDark ? Colors.transparent : AppColors.border(context)),
               width: 1.5,
             ),
           ),
@@ -863,7 +877,7 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 size: 22,
                 color: isSelected
                     ? AppColors.accentGreen
-                    : AppColors.textSecondary,
+                    : AppColors.textSub(context),
               ),
               const SizedBox(height: 8),
               Text(
@@ -871,7 +885,9 @@ class _AddHabitModalState extends ConsumerState<AddHabitModal> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                  color: isSelected
+                      ? AppColors.textMain(context)
+                      : AppColors.textSub(context),
                 ),
               ),
             ],
@@ -921,6 +937,7 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
     final filtered = _allSystemIcons.where((item) {
       final matchesCategory =
           _selectedCategory == 'All' || item.category == _selectedCategory;
@@ -947,7 +964,7 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
                   width: 48,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: isDark ? Colors.white24 : Colors.black26,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -956,26 +973,28 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Select Habit Icon',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textMain(context),
                     ),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
                       padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF1E2638),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF1E2638)
+                            : AppColors.chipUnselected(context),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
                         size: 18,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSub(context),
                       ),
                     ),
                   ),
@@ -987,21 +1006,24 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0F1420),
+                  color: isDark ? const Color(0xFF0F1420) : Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0xFF222B3D)),
+                  border: Border.all(color: AppColors.border(context)),
                 ),
                 child: TextField(
                   controller: _searchController,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  decoration: const InputDecoration(
+                  style: TextStyle(
+                    color: AppColors.textMain(context),
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
                     icon: Icon(
                       Icons.search,
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSub(context),
                       size: 20,
                     ),
                     hintText: 'Search icons (e.g. run, book, water, sleep)...',
-                    hintStyle: TextStyle(
+                    hintStyle: const TextStyle(
                       color: AppColors.textMuted,
                       fontSize: 13,
                     ),
@@ -1029,7 +1051,7 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? AppColors.accentGreen
-                                : const Color(0xFF1A2234),
+                                : AppColors.chipUnselected(context),
                             borderRadius: BorderRadius.circular(18),
                           ),
                           child: Text(
@@ -1039,7 +1061,7 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
                               fontWeight: FontWeight.w800,
                               color: isSelected
                                   ? const Color(0xFF0F131D)
-                                  : AppColors.textSecondary,
+                                  : AppColors.textSub(context),
                             ),
                           ),
                         ),
@@ -1074,12 +1096,14 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.accentGreen.withValues(alpha: 0.16)
-                              : const Color(0xFF171E2D),
+                              : (isDark
+                                    ? const Color(0xFF171E2D)
+                                    : Colors.white),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: isSelected
                                 ? AppColors.accentGreen
-                                : const Color(0xFF232D42),
+                                : AppColors.border(context),
                             width: isSelected ? 2 : 1,
                           ),
                         ),
@@ -1091,7 +1115,7 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
                               size: 26,
                               color: isSelected
                                   ? AppColors.accentGreen
-                                  : Colors.white,
+                                  : AppColors.textMain(context),
                             ),
                             const SizedBox(height: 6),
                             Text(
@@ -1104,7 +1128,7 @@ class _SystemIconPickerSheetState extends State<_SystemIconPickerSheet> {
                                 fontWeight: FontWeight.w600,
                                 color: isSelected
                                     ? AppColors.accentGreen
-                                    : AppColors.textSecondary,
+                                    : AppColors.textSub(context),
                               ),
                             ),
                           ],

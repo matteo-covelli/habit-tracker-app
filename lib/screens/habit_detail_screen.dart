@@ -70,19 +70,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
       initialDate: _focusedMonth,
       firstDate: DateTime(2020),
       lastDate: DateTime(2035),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.accentGreen,
-              onPrimary: Color(0xFF0F131D),
-              surface: AppColors.surface,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) => AppColors.pickerTheme(context, child),
     );
 
     if (picked != null) {
@@ -100,19 +88,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2035),
       initialDatePickerMode: DatePickerMode.year,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.accentGreen,
-              onPrimary: Color(0xFF0F131D),
-              surface: AppColors.surface,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: (context, child) => AppColors.pickerTheme(context, child),
     );
 
     if (picked != null) {
@@ -135,32 +111,32 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
     final habit = habits.where((h) => h.id == widget.habitId).firstOrNull;
 
     if (habit == null) {
-      return const Scaffold(backgroundColor: AppColors.background);
+      return Scaffold(backgroundColor: AppColors.bg(context));
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bg(context),
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.bg(context),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textMain(context)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         titleSpacing: 4,
-        title: const Text(
+        title: Text(
           'Habit Detail & History',
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: AppColors.textMain(context),
           ),
         ),
         actions: [
           IconButton(
             tooltip: 'Edit Habit',
-            icon: const Icon(
+            icon: Icon(
               Icons.edit_outlined,
-              color: AppColors.textPrimary,
+              color: AppColors.textMain(context),
               size: 22,
             ),
             onPressed: () => _editHabit(habit),
@@ -172,37 +148,44 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         child: Column(
           children: [
-            _buildHeaderCard(habit),
+            _buildHeaderCard(context, habit),
             const SizedBox(height: 18),
-            _buildMonthlyCalendarCard(habit),
+            _buildMonthlyCalendarCard(context, habit),
             const SizedBox(height: 18),
-            _buildAnnualConsistencyCard(habit),
+            _buildAnnualConsistencyCard(context, habit),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeaderCard(Habit habit) {
+  Widget _buildHeaderCard(BuildContext context, Habit habit) {
+    final isDark = AppColors.isDark(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(
-        color: const Color(0xFF171E2C),
+        color: isDark ? const Color(0xFF171E2C) : Colors.white,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFF232D42), width: 1),
+        border: Border.all(
+          color: isDark ? const Color(0xFF232D42) : AppColors.border(context),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
           Container(
             width: 54,
             height: 54,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xFF232B3E),
+              color: isDark
+                  ? const Color(0xFF232B3E)
+                  : AppColors.accentPrimary(context).withValues(alpha: 0.12),
             ),
             child: Icon(
               IconData(habit.iconCodePoint, fontFamily: 'MaterialIcons'),
-              color: AppColors.primaryButton,
+              color: AppColors.accentPrimary(context),
               size: 26,
             ),
           ),
@@ -213,10 +196,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
               children: [
                 Text(
                   habit.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textMain(context),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -226,10 +209,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF33261B),
+                    color: AppColors.streakBg(context),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
-                      color: const Color(0xFF4D3822),
+                      color: AppColors.streakBorder(context),
                       width: 1,
                     ),
                   ),
@@ -240,10 +223,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                       const SizedBox(width: 6),
                       Text(
                         '${habit.streakDays} Days',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.accentOrange,
+                          color: AppColors.streakText(context),
                         ),
                       ),
                     ],
@@ -257,7 +240,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
     );
   }
 
-  Widget _buildMonthlyCalendarCard(Habit habit) {
+  Widget _buildMonthlyCalendarCard(BuildContext context, Habit habit) {
+    final isDark = AppColors.isDark(context);
     final monthLabel = DateFormat('MMMM yyyy').format(_focusedMonth);
     final firstDayOfMonth = DateTime(_focusedMonth.year, _focusedMonth.month, 1);
     final daysInMonth = DateUtils.getDaysInMonth(
@@ -272,9 +256,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF151C28),
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFF212B3E), width: 1),
+        border: Border.all(color: AppColors.border(context), width: 1),
       ),
       child: Column(
         children: [
@@ -291,19 +275,21 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0E131D),
+                      color: AppColors.subtleBg(context),
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: const Color(0xFF253047),
+                        color: isDark
+                            ? const Color(0xFF253047)
+                            : AppColors.border(context),
                         width: 1,
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.calendar_month_outlined,
-                          color: AppColors.primaryButton,
+                          color: AppColors.accentPrimary(context),
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -312,17 +298,17 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                             monthLabel,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textMain(context),
                             ),
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(
+                        Icon(
                           Icons.keyboard_arrow_down_rounded,
-                          color: AppColors.primaryButton,
+                          color: AppColors.accentPrimary(context),
                           size: 18,
                         ),
                       ],
@@ -334,7 +320,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0E131D),
+                  color: AppColors.subtleBg(context),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -344,9 +330,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                       padding: const EdgeInsets.all(6),
                       constraints: const BoxConstraints(),
                       visualDensity: VisualDensity.compact,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.chevron_left,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSub(context),
                         size: 20,
                       ),
                       onPressed: _previousMonth,
@@ -356,9 +342,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                       padding: const EdgeInsets.all(6),
                       constraints: const BoxConstraints(),
                       visualDensity: VisualDensity.compact,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.chevron_right,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSub(context),
                         size: 20,
                       ),
                       onPressed: _nextMonth,
@@ -380,10 +366,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                     child: Center(
                       child: Text(
                         label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textSub(context),
                         ),
                       ),
                     ),
@@ -433,21 +419,21 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                     shape: BoxShape.circle,
                     color: isCompleted
                         ? AppColors.accentGreen
-                        : const Color(0xFF232B3C),
+                        : AppColors.cellUnmarked(context),
                     border: isToday
                         ? Border.all(
                             color: isCompleted
                                 ? Colors.white
-                                : AppColors.primaryButton,
+                                : AppColors.accentPrimary(context),
                             width: 2,
                           )
                         : null,
                     boxShadow: isToday
                         ? [
                             BoxShadow(
-                              color: AppColors.primaryButton.withValues(
-                                alpha: 0.35,
-                              ),
+                              color: AppColors.accentPrimary(
+                                context,
+                              ).withValues(alpha: 0.35),
                               blurRadius: 8,
                               spreadRadius: 1,
                             ),
@@ -463,8 +449,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                         color: isCompleted
                             ? const Color(0xFF0F131D)
                             : isToday
-                            ? Colors.white
-                            : AppColors.textSecondary,
+                            ? AppColors.textMain(context)
+                            : AppColors.textSub(context),
                       ),
                     ),
                   ),
@@ -475,15 +461,15 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
           const SizedBox(height: 18),
 
           // Istruzione tap
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.touch_app_outlined,
                 size: 16,
-                color: AppColors.primaryButton,
+                color: AppColors.accentPrimary(context),
               ),
-              SizedBox(width: 6),
+              const SizedBox(width: 6),
               Flexible(
                 child: Text(
                   'Tap any date to mark or unmark completion',
@@ -492,7 +478,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textSub(context),
                   ),
                 ),
               ),
@@ -505,7 +491,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF101520),
+              color: isDark
+                  ? const Color(0xFF101520)
+                  : AppColors.subtleBg(context),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Wrap(
@@ -514,16 +502,21 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
               runSpacing: 6,
               children: [
                 _buildCalendarLegendItem(
+                  context: context,
                   color: AppColors.accentGreen,
                   label: 'Completed',
                 ),
                 _buildCalendarLegendItem(
-                  color: AppColors.primaryButton,
+                  context: context,
+                  color: AppColors.accentPrimary(context),
                   hasGlowRing: true,
                   label: 'Today',
                 ),
                 _buildCalendarLegendItem(
-                  color: const Color(0xFF283144),
+                  context: context,
+                  color: isDark
+                      ? const Color(0xFF283144)
+                      : const Color(0xFFCBD5E1),
                   label: 'Unmarked',
                 ),
               ],
@@ -535,6 +528,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
   }
 
   Widget _buildCalendarLegendItem({
+    required BuildContext context,
     required Color color,
     required String label,
     bool hasGlowRing = false,
@@ -549,24 +543,30 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
             shape: BoxShape.circle,
             color: color,
             border: hasGlowRing
-                ? Border.all(color: Colors.white70, width: 1.5)
+                ? Border.all(
+                    color: AppColors.isDark(context)
+                        ? Colors.white70
+                        : Colors.white,
+                    width: 1.5,
+                  )
                 : null,
           ),
         ),
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: AppColors.textSecondary,
+            color: AppColors.textSub(context),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildAnnualConsistencyCard(Habit habit) {
+  Widget _buildAnnualConsistencyCard(BuildContext context, Habit habit) {
+    final isDark = AppColors.isDark(context);
     final yearPrefix = '$_selectedYear-';
     final completedInYear = habit.completedDates
         .where((d) => d.startsWith(yearPrefix))
@@ -588,9 +588,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF151C28),
+        color: AppColors.card(context),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFF212B3E), width: 1),
+        border: Border.all(color: AppColors.border(context), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -599,7 +599,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Annual Consistency',
                   maxLines: 1,
@@ -607,7 +607,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textMain(context),
                   ),
                 ),
               ),
@@ -620,35 +620,37 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0E131D),
+                    color: AppColors.subtleBg(context),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
-                      color: const Color(0xFF253047),
+                      color: isDark
+                          ? const Color(0xFF253047)
+                          : AppColors.border(context),
                       width: 1,
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.calendar_month_outlined,
                         size: 16,
-                        color: AppColors.primaryButton,
+                        color: AppColors.accentPrimary(context),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         '$_selectedYear',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.primaryButton,
+                          color: AppColors.accentPrimary(context),
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(
+                      Icon(
                         Icons.keyboard_arrow_down_rounded,
                         size: 16,
-                        color: AppColors.primaryButton,
+                        color: AppColors.accentPrimary(context),
                       ),
                     ],
                   ),
@@ -662,7 +664,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF101520),
+              color: isDark
+                  ? const Color(0xFF101520)
+                  : AppColors.subtleBg(context),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -676,10 +680,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                 Expanded(
                   child: Text(
                     '$completedInYear days completed in $_selectedYear',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textMain(context),
                     ),
                   ),
                 ),
@@ -707,10 +711,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         label,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textSub(context),
                         ),
                       ),
                     );
@@ -740,10 +744,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                               maxWidth: 36,
                               child: Text(
                                 monthLabel ?? '',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.textSub(context),
                                 ),
                               ),
                             ),
@@ -788,7 +792,9 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                                         ? Colors.transparent
                                         : isCompleted
                                         ? AppColors.accentGreen
-                                        : const Color(0xFF263042),
+                                        : (isDark
+                                              ? const Color(0xFF263042)
+                                              : const Color(0xFFE2E8F0)),
                                     borderRadius: BorderRadius.circular(3.5),
                                   ),
                                 ),
@@ -810,11 +816,15 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               _buildConsistencyLegendItem(
-                color: const Color(0xFF263042),
+                context: context,
+                color: isDark
+                    ? const Color(0xFF263042)
+                    : const Color(0xFFE2E8F0),
                 label: 'Unmarked',
               ),
               const SizedBox(width: 14),
               _buildConsistencyLegendItem(
+                context: context,
                 color: AppColors.accentGreen,
                 label: 'Marked',
               ),
@@ -840,6 +850,7 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
   }
 
   Widget _buildConsistencyLegendItem({
+    required BuildContext context,
     required Color color,
     required String label,
   }) {
@@ -857,10 +868,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: AppColors.textSecondary,
+            color: AppColors.textSub(context),
           ),
         ),
       ],

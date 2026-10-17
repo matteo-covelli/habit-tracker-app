@@ -3,6 +3,7 @@ import '../constants/app_colors.dart';
 import 'analytics_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
+import 'settings_screen.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
@@ -18,19 +19,26 @@ class _MainShellScreenState extends State<MainShellScreen> {
     HomeScreen(),
     AnalyticsScreen(),
     ProfileScreen(),
-    _SettingsPlaceholderScreen(),
+    SettingsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDark(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bg(context),
       body: IndexedStack(index: _selectedIndex, children: _screens),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF121622),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF121622) : Colors.white,
           border: Border(
-            top: BorderSide(color: Color(0xFF1E2638), width: 0.8),
+            top: BorderSide(
+              color: isDark
+                  ? const Color(0xFF1E2638)
+                  : const Color(0xFFE2E8F0),
+              width: 0.8,
+            ),
           ),
         ),
         child: SafeArea(
@@ -41,21 +49,25 @@ class _MainShellScreenState extends State<MainShellScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
+                  context: context,
                   index: 0,
                   icon: Icons.home_outlined,
                   activeIcon: Icons.home,
                 ),
                 _buildNavItem(
+                  context: context,
                   index: 1,
                   icon: Icons.auto_graph_outlined,
                   activeIcon: Icons.auto_graph,
                 ),
                 _buildNavItem(
+                  context: context,
                   index: 2,
                   icon: Icons.person_outline,
                   activeIcon: Icons.person_outline,
                 ),
                 _buildNavItem(
+                  context: context,
                   index: 3,
                   icon: Icons.settings_outlined,
                   activeIcon: Icons.settings,
@@ -69,11 +81,13 @@ class _MainShellScreenState extends State<MainShellScreen> {
   }
 
   Widget _buildNavItem({
+    required BuildContext context,
     required int index,
     required IconData icon,
     required IconData activeIcon,
   }) {
     final isSelected = _selectedIndex == index;
+    final isDark = AppColors.isDark(context);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -82,36 +96,19 @@ class _MainShellScreenState extends State<MainShellScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF323954) : Colors.transparent,
+          color: isSelected
+              ? (isDark
+                    ? const Color(0xFF323954)
+                    : const Color(0xFF6366F1).withValues(alpha: 0.14))
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Icon(
           isSelected ? activeIcon : icon,
-          color: isSelected ? AppColors.primaryButton : AppColors.textSecondary,
+          color: isSelected
+              ? AppColors.accentPrimary(context)
+              : AppColors.textSub(context),
           size: 24,
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsPlaceholderScreen extends StatelessWidget {
-  const _SettingsPlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: Text(
-            'Settings',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
         ),
       ),
     );

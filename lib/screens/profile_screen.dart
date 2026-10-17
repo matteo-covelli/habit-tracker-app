@@ -9,9 +9,10 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final totalCompleted = ref.watch(totalCompletedHabitsProvider);
+    final isDark = AppColors.isDark(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bg(context),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 28, 16, 32),
@@ -25,16 +26,33 @@ class ProfileScreen extends ConsumerWidget {
                   vertical: 28,
                 ),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1E2638), Color(0xFF171D2B)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
+                  gradient: isDark
+                      ? const LinearGradient(
+                          colors: [Color(0xFF1E2638), Color(0xFF171D2B)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        )
+                      : const LinearGradient(
+                          colors: [Colors.white, Color(0xFFF8FAFC)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: const Color(0xFF263044),
+                    color: isDark
+                        ? const Color(0xFF263044)
+                        : AppColors.border(context),
                     width: 1,
                   ),
+                  boxShadow: isDark
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                 ),
                 child: Column(
                   children: [
@@ -57,7 +75,7 @@ class ProfileScreen extends ConsumerWidget {
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF818CF8).withValues(
-                              alpha: 0.28,
+                              alpha: isDark ? 0.28 : 0.2,
                             ),
                             blurRadius: 24,
                             spreadRadius: 2,
@@ -65,11 +83,13 @@ class ProfileScreen extends ConsumerWidget {
                         ],
                       ),
                       child: Container(
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
-                            colors: [Color(0xFF1D3549), Color(0xFF0B1320)],
-                            center: Alignment(0, -0.2),
+                            colors: isDark
+                                ? const [Color(0xFF1D3549), Color(0xFF0B1320)]
+                                : const [Color(0xFFEEF2FF), Color(0xFFE0E7FF)],
+                            center: const Alignment(0, -0.2),
                             radius: 0.9,
                           ),
                         ),
@@ -77,7 +97,6 @@ class ProfileScreen extends ConsumerWidget {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              // Luci neon di sfondo stile cyberpunk
                               Positioned(
                                 left: 10,
                                 top: 22,
@@ -106,10 +125,12 @@ class ProfileScreen extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.person,
                                 size: 68,
-                                color: Color(0xFFCBD5E1),
+                                color: isDark
+                                    ? const Color(0xFFCBD5E1)
+                                    : const Color(0xFF4F46E5),
                               ),
                             ],
                           ),
@@ -117,12 +138,12 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const Text(
+                    Text(
                       'John Doe',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textMain(context),
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -139,12 +160,23 @@ class ProfileScreen extends ConsumerWidget {
                   vertical: 20,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF171D2B),
+                  color: isDark ? const Color(0xFF171D2B) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: const Color(0xFF242D40),
+                    color: isDark
+                        ? const Color(0xFF242D40)
+                        : AppColors.border(context),
                     width: 1,
                   ),
+                  boxShadow: isDark
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -152,22 +184,22 @@ class ProfileScreen extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'TOTAL HABITS COMPLETED',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.8,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textSub(context),
                           ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           '$totalCompleted',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textMain(context),
                           ),
                         ),
                       ],
@@ -175,13 +207,17 @@ class ProfileScreen extends ConsumerWidget {
                     Container(
                       width: 48,
                       height: 48,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFF252D40),
+                        color: isDark
+                            ? const Color(0xFF252D40)
+                            : AppColors.accentPrimary(
+                                context,
+                              ).withValues(alpha: 0.12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.check_circle_outline,
-                        color: AppColors.primaryButton,
+                        color: AppColors.accentPrimary(context),
                         size: 24,
                       ),
                     ),
@@ -200,15 +236,19 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                icon: const Icon(
+                icon: Icon(
                   Icons.logout_rounded,
-                  color: Color(0xFFF49D8A),
+                  color: isDark
+                      ? const Color(0xFFF49D8A)
+                      : const Color(0xFFDC2626),
                   size: 20,
                 ),
-                label: const Text(
+                label: Text(
                   'Logout',
                   style: TextStyle(
-                    color: Color(0xFFF49D8A),
+                    color: isDark
+                        ? const Color(0xFFF49D8A)
+                        : const Color(0xFFDC2626),
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.4,

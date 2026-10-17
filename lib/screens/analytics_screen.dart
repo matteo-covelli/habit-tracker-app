@@ -55,8 +55,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       }
     }).toList();
 
+    final isDark = AppColors.isDark(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bg(context),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -66,22 +68,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Habit Analytics',
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textMain(context),
                         letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Select a habit to inspect calendar continuity and historical adherence.',
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.4,
-                        color: AppColors.textSecondary,
+                        color: AppColors.textSub(context),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -90,28 +92,32 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0A0D15),
+                        color: isDark
+                            ? const Color(0xFF0A0D15)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: const Color(0xFF192132),
+                          color: isDark
+                              ? const Color(0xFF192132)
+                              : AppColors.border(context),
                           width: 1,
                         ),
                       ),
                       child: TextField(
                         controller: _searchController,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: AppColors.textMain(context),
                           fontSize: 14,
                         ),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           icon: Icon(
                             Icons.search,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textSub(context),
                             size: 20,
                           ),
                           hintText: 'Filter habits by title or tag...',
                           hintStyle: TextStyle(
-                            color: AppColors.textSecondary,
+                            color: AppColors.textSub(context),
                             fontSize: 14,
                           ),
                           border: InputBorder.none,
@@ -123,11 +129,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     // Filtri ALL / BUILD / BREAK
                     Row(
                       children: [
-                        _buildFilterChip(_AnalyticsFilter.all, 'ALL'),
+                        _buildFilterChip(context, _AnalyticsFilter.all, 'ALL'),
                         const SizedBox(width: 8),
-                        _buildFilterChip(_AnalyticsFilter.build, 'BUILD'),
+                        _buildFilterChip(
+                          context,
+                          _AnalyticsFilter.build,
+                          'BUILD',
+                        ),
                         const SizedBox(width: 8),
-                        _buildFilterChip(_AnalyticsFilter.breakHabit, 'BREAK'),
+                        _buildFilterChip(
+                          context,
+                          _AnalyticsFilter.breakHabit,
+                          'BREAK',
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -137,13 +151,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
 
             if (filteredHabits.isEmpty)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
                   child: Text(
                     'No habits found.',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textSub(context),
                       fontSize: 15,
                     ),
                   ),
@@ -175,20 +189,28 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     );
   }
 
-  Widget _buildFilterChip(_AnalyticsFilter filter, String label) {
+  Widget _buildFilterChip(
+    BuildContext context,
+    _AnalyticsFilter filter,
+    String label,
+  ) {
     final isSelected = _selectedFilter == filter;
+    final isDark = AppColors.isDark(context);
+
     return GestureDetector(
       onTap: () => setState(() => _selectedFilter = filter),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryButton : const Color(0xFF141A26),
+          color: isSelected
+              ? AppColors.accentPrimary(context)
+              : (isDark ? const Color(0xFF141A26) : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? AppColors.primaryButton
-                : const Color(0xFF222B3D),
+                ? AppColors.accentPrimary(context)
+                : AppColors.border(context),
             width: 1,
           ),
         ),
@@ -198,7 +220,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             fontSize: 11,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.6,
-            color: isSelected ? AppColors.primaryButtonText : Colors.white,
+            color: isSelected
+                ? AppColors.accentPrimaryFg(context)
+                : AppColors.textMain(context),
           ),
         ),
       ),
@@ -214,8 +238,15 @@ class _AnalyticsHabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = AppColors.getHabitIconColor(habit.iconCodePoint);
-    final iconBgColor = AppColors.getHabitIconBgColor(habit.iconCodePoint);
+    final isDark = AppColors.isDark(context);
+    final iconColor = AppColors.getHabitIconColor(
+      habit.iconCodePoint,
+      isDark: isDark,
+    );
+    final iconBgColor = AppColors.getHabitIconBgColor(
+      habit.iconCodePoint,
+      isDark: isDark,
+    );
 
     return GestureDetector(
       onTap: onTap,
@@ -223,9 +254,18 @@ class _AnalyticsHabitCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 5),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
-          color: const Color(0xFF151C28),
+          color: AppColors.card(context),
           borderRadius: BorderRadius.circular(36),
-          border: Border.all(color: const Color(0xFF212B3E), width: 1),
+          border: Border.all(color: AppColors.border(context), width: 1),
+          boxShadow: isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
         child: Row(
           children: [
@@ -237,7 +277,7 @@ class _AnalyticsHabitCard extends StatelessWidget {
                 color: iconBgColor,
                 boxShadow: [
                   BoxShadow(
-                    color: iconColor.withValues(alpha: 0.2),
+                    color: iconColor.withValues(alpha: isDark ? 0.2 : 0.12),
                     blurRadius: 12,
                     spreadRadius: 0.5,
                   ),
@@ -255,16 +295,16 @@ class _AnalyticsHabitCard extends StatelessWidget {
                 habit.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15.5,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textMain(context),
                 ),
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
-              color: AppColors.textSecondary,
+              color: AppColors.textSub(context),
               size: 20,
             ),
           ],
