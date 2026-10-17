@@ -220,44 +220,44 @@ class _AnalyticsHabitCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 7),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
         decoration: BoxDecoration(
           color: const Color(0xFF151C28),
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BorderRadius.circular(36),
           border: Border.all(color: const Color(0xFF212B3E), width: 1),
         ),
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: iconBgColor,
                 boxShadow: [
                   BoxShadow(
-                    color: iconColor.withValues(alpha: 0.22),
-                    blurRadius: 16,
-                    spreadRadius: 1,
+                    color: iconColor.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    spreadRadius: 0.5,
                   ),
                 ],
               ),
               child: Icon(
                 IconData(habit.iconCodePoint, fontFamily: 'MaterialIcons'),
                 color: iconColor,
-                size: 25,
+                size: 21,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 habit.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -265,7 +265,7 @@ class _AnalyticsHabitCard extends StatelessWidget {
             const Icon(
               Icons.chevron_right,
               color: AppColors.textSecondary,
-              size: 22,
+              size: 20,
             ),
           ],
         ),

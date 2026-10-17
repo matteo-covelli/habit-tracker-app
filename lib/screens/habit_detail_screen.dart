@@ -64,16 +64,62 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
     });
   }
 
-  void _previousYear() {
-    setState(() {
-      _selectedYear -= 1;
-    });
+  Future<void> _selectMonthAndYear() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _focusedMonth,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.accentGreen,
+              onPrimary: Color(0xFF0F131D),
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _focusedMonth = DateTime(picked.year, picked.month);
+      });
+    }
   }
 
-  void _nextYear() {
-    setState(() {
-      _selectedYear += 1;
-    });
+  Future<void> _selectConsistencyYear() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(_selectedYear, now.month, 1),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      initialDatePickerMode: DatePickerMode.year,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.accentGreen,
+              onPrimary: Color(0xFF0F131D),
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedYear = picked.year;
+      });
+    }
   }
 
   Future<void> _editHabit(Habit habit) async {
@@ -218,7 +264,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
       _focusedMonth.year,
       _focusedMonth.month,
     );
-    // 1 = Monday -> 0 leading empty cells; 7 = Sunday -> 6 leading empty cells
     final leadingEmptyDays = firstDayOfMonth.weekday - 1;
     final totalGridCells = leadingEmptyDays + daysInMonth;
 
@@ -233,29 +278,61 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
       ),
       child: Column(
         children: [
-          // Intestazione mese + frecce
+          // Intestazione mese + selettore mese/anno + frecce
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_month_outlined,
-                    color: AppColors.primaryButton,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    monthLabel,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+              Flexible(
+                child: GestureDetector(
+                  onTap: _selectMonthAndYear,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0E131D),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: const Color(0xFF253047),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.calendar_month_outlined,
+                          color: AppColors.primaryButton,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            monthLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: AppColors.primaryButton,
+                          size: 18,
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0E131D),
                   borderRadius: BorderRadius.circular(20),
@@ -264,6 +341,8 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(),
                       visualDensity: VisualDensity.compact,
                       icon: const Icon(
                         Icons.chevron_left,
@@ -272,7 +351,10 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                       ),
                       onPressed: _previousMonth,
                     ),
+                    const SizedBox(width: 4),
                     IconButton(
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(),
                       visualDensity: VisualDensity.compact,
                       icon: const Icon(
                         Icons.chevron_right,
@@ -402,12 +484,16 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                 color: AppColors.primaryButton,
               ),
               SizedBox(width: 6),
-              Text(
-                'Tap any date to mark or unmark completion',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+              Flexible(
+                child: Text(
+                  'Tap any date to mark or unmark completion',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -416,13 +502,16 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
 
           // Legenda
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: const Color(0xFF101520),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            child: Wrap(
+              alignment: WrapAlignment.spaceAround,
+              spacing: 12,
+              runSpacing: 6,
               children: [
                 _buildCalendarLegendItem(
                   color: AppColors.accentGreen,
@@ -506,54 +595,63 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Intestazione + selettore anno
+          // Intestazione + selettore anno interattivo
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Annual Consistency',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
+              const Expanded(
+                child: Text(
+                  'Annual Consistency',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0E131D),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(
-                        Icons.chevron_left,
-                        color: AppColors.textSecondary,
-                        size: 18,
-                      ),
-                      onPressed: _previousYear,
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: _selectConsistencyYear,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0E131D),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: const Color(0xFF253047),
+                      width: 1,
                     ),
-                    Text(
-                      '$_selectedYear',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.calendar_month_outlined,
+                        size: 16,
                         color: AppColors.primaryButton,
                       ),
-                    ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: const Icon(
-                        Icons.chevron_right,
-                        color: AppColors.textSecondary,
-                        size: 18,
+                      const SizedBox(width: 6),
+                      Text(
+                        '$_selectedYear',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primaryButton,
+                        ),
                       ),
-                      onPressed: _nextYear,
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 16,
+                        color: AppColors.primaryButton,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -575,12 +673,14 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
                   size: 18,
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  '$completedInYear days completed in $_selectedYear',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: Text(
+                    '$completedInYear days completed in $_selectedYear',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -733,7 +833,6 @@ class _HabitDetailScreenState extends ConsumerState<HabitDetailScreen> {
         startGridDate.day + (weekIndex * 7) + d,
       );
       if (date.year == _selectedYear && date.day == 1) {
-        // Evita sovrapposizioni se la prima settimana ha già mostrato Jan
         return _monthShortNames[date.month - 1];
       }
     }

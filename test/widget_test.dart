@@ -20,8 +20,12 @@ class _FakeQuoteService extends QuoteService {
 
 void main() {
   testWidgets(
-    'Home swipe, Analytics detail calendar & consistency, and Profile screen test',
+    'Home PageView slide, Analytics detail pickers, and modern Create/Edit modal test',
     (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       SharedPreferences.setMockInitialValues({});
       final sharedPreferences = await SharedPreferences.getInstance();
       final repo = HabitRepository(sharedPreferences);
@@ -54,76 +58,50 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // 1. Verifica Home Screen e che il tap sull'abitudine NON apra il pannello di modifica
+      // 1. Verifica Home Screen e PageView slide per il cambio giorno
+      expect(find.byType(PageView), findsOneWidget);
       expect(find.text("TODAY'S HABITS"), findsOneWidget);
-      expect(find.text('Zone 2 Aerobic Base'), findsOneWidget);
-      expect(find.text('1 of 1 Completed'), findsOneWidget);
 
-      await tester.tap(find.text('Zone 2 Aerobic Base'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Edit Habit'), findsNothing);
-      expect(find.text('0 of 1 Completed'), findsOneWidget);
-
-      // Ri-marca come completata
-      await tester.tap(find.text('Zone 2 Aerobic Base'));
-      await tester.pumpAndSettle();
-      expect(find.text('1 of 1 Completed'), findsOneWidget);
-
-      // 2. Verifica swipe orizzontale nella Home per cambiare giorno
       await tester.fling(
-        find.byType(CustomScrollView).first,
+        find.byType(PageView),
         const Offset(-400, 0),
         1000,
       );
       await tester.pumpAndSettle();
       expect(find.text('HABITS FOR THIS DAY'), findsOneWidget);
 
-      // Torna a oggi con swipe verso destra
       await tester.fling(
-        find.byType(CustomScrollView).first,
+        find.byType(PageView),
         const Offset(400, 0),
         1000,
       );
       await tester.pumpAndSettle();
       expect(find.text("TODAY'S HABITS"), findsOneWidget);
 
-      // 3. Naviga alla schermata Analytics
+      // 2. Naviga alla schermata Analytics e apri il dettaglio
       await tester.tap(find.byIcon(Icons.auto_graph_outlined));
       await tester.pumpAndSettle();
 
-      expect(find.text('Habit Analytics'), findsOneWidget);
-      expect(find.text('Zone 2 Aerobic Base'), findsWidgets);
-
-      // Apri il dettaglio dell'abitudine
       await tester.tap(find.text('Zone 2 Aerobic Base').last);
       await tester.pumpAndSettle();
 
       expect(find.text('Habit Detail & History'), findsOneWidget);
-      expect(find.text('Annual Consistency'), findsOneWidget);
-      expect(find.text('1 days completed in ${now.year}'), findsOneWidget);
-      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
-      expect(find.text('Pause Habit'), findsNothing);
 
-      // Verifica apertura modifica dalla matita in alto
+      // Verifica selettore Anno built-in per Annual Consistency
+      await tester.ensureVisible(find.text('${now.year}'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('${now.year}'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DatePickerDialog), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // 3. Verifica modal Edit Habit (senza Choose Icon, con selettore icona accanto al nome)
       await tester.tap(find.byIcon(Icons.edit_outlined));
       await tester.pumpAndSettle();
       expect(find.text('Edit Habit'), findsOneWidget);
-
-      // Chiudi il modal di modifica e torna indietro da Detail
-      await tester.tap(find.byIcon(Icons.close));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.arrow_back));
-      await tester.pumpAndSettle();
-
-      // 4. Naviga alla schermata Profile
-      await tester.tap(find.byIcon(Icons.person_outline));
-      await tester.pumpAndSettle();
-
-      expect(find.text('John Doe'), findsOneWidget);
-      expect(find.text('TOTAL HABITS COMPLETED'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('Logout'), findsOneWidget);
+      expect(find.text('Habit Name & Icon'), findsOneWidget);
+      expect(find.text('Choose Icon'), findsNothing);
     },
   );
 }

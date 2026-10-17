@@ -6,19 +6,19 @@ import '../models/habit.dart';
 
 class HabitTile extends ConsumerWidget {
   final Habit habit;
+  final DateTime? date;
 
-  const HabitTile({super.key, required this.habit});
+  const HabitTile({super.key, required this.habit, this.date});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Risponde alla data attiva selezionata
-    final selectedDate = ref.watch(selectedDateProvider);
-    final isCompleted = habit.isCompletedOn(selectedDate);
+    final DateTime targetDate = date ?? ref.watch(selectedDateProvider);
+    final isCompleted = habit.isCompletedOn(targetDate);
 
     void toggleCompletion() {
       ref
           .read(habitsProvider.notifier)
-          .toggleHabitCompletion(habit.id, selectedDate);
+          .toggleHabitCompletion(habit.id, targetDate);
     }
 
     return GestureDetector(
